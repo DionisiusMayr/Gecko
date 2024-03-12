@@ -6,7 +6,7 @@ import json
 import os
 from jikanpy import Jikan
 
-TOTAL_REQUESTS_PER_SECOND = 2
+TOTAL_REQUESTS_PER_SECOND = 0.5
 PREVIOUS_REQUEST_TIME = datetime.datetime.now()
 MAX_RETRIES = 3
 jikan = Jikan()
@@ -41,7 +41,7 @@ def wait_for_request():
     '''
     Waits for a request in order to not get blacklisted by MAL
     '''
-    min_waiting_in_ms = (1000.0/2)
+    min_waiting_in_ms = (1000.0/TOTAL_REQUESTS_PER_SECOND)
     current_waiting_time_in_ms = (datetime.datetime.now() - PREVIOUS_REQUEST_TIME).microseconds
     if min_waiting_in_ms <= current_waiting_time_in_ms:
         return
@@ -54,13 +54,18 @@ def request_user_anime_list(username, retry = 0, offset = 0):
     data = requests.get('https://myanimelist.net/animelist/{}/load.json?offset={}'.format(username, offset))
     if retry >= MAX_RETRIES:
         return None
+    if data.status_code == 405 :
+        # Got rate limited wait a minute.
+        print('Got Rate Limited, waiting ...')
+        time.sleep(60)
     if data.status_code != 200 and retry < MAX_RETRIES:
         return request_user_anime_list(username, retry = retry+1)
 
     json_array = data.json()
     # 300 is the pagination size of MAL
-    if len(json_array) % 300 == 0 :
-        return json_array + request_user_anime_list(username, offset = offset + 300)
+    if len(json_array) % 300 == 0 and len(json_array) >0:
+        next_result =  request_user_anime_list(username, offset = offset + 300)
+        return json_array + (next_result if next_result is not None else [])
     return json_array
 
 def request_anime_reviews(anime_id, retry = 0):
@@ -192,7 +197,10 @@ def main():
                 if anime_reviews is None:
                     continue
                 for user in anime_reviews['data']:
-                    usernames_to_query.append(user['user']['username'])
+                    username = user['user']['username']
+                    usernames_to_query.append(username)
+                    get_user_anime_list(username)
+                    get_user_info(username)
 
 if __name__ == "__main__":
     main()
