@@ -4,7 +4,10 @@ import requests
 import os
 import pandas as pd
 import json
-import gzip 
+import gzip
+import pyarrow.parquet as pq
+import pyarrow as pa
+import io
 
 
 API_KEY = 'f95b4a84e123d3cf04a4b4730e1bcf32'
@@ -23,8 +26,9 @@ def raw_movie_day(path):
     json_movies_id = gzip.decompress(response.content).decode('utf8')
 
     day_before_str = day_before.strftime('%Y-%m-%d')
-    with open(path+ 'raw_movies_'+ day_before_str +'.json', 'w') as f:
-        f.write(json_movies_id)
+    df = pd.read_json(json_movies_id, lines=True)
+    df.to_parquet(path+ 'raw_movies_'+ day_before_str +'.parquet', engine='fastparquet')
+
         
 def raw_movies_id(path):
     '''stores all movies id available'''
@@ -38,31 +42,31 @@ def raw_movies_id(path):
 def movie_info(movie_id, path):
     '''stores info of a movie'''
     try:
-        file = path + [f for f in os.listdir(path) if f == 'movie_info_'+str(movie_id)+'.json' ][0]
+        file = path + [f for f in os.listdir(path) if f == 'movie_info_'+str(movie_id)+'.parquet' ][0]
     except:
         movie = tmdb.Movies(movie_id).info()
-        fname = path + 'movie_info_'+str(movie_id)+'.json'
-        with open(fname, 'w') as f:
-            json.dump(movie, f)
+        fname = path + 'movie_info_'+str(movie_id)+'.parquet'
+        df = pd.DataFrame([movie])
+        df.to_parquet(fname, engine='fastparquet')
 
 def movie_review(movie_id, path):
     '''get reviews for a movie'''
     try:
-        file = path + [f for f in os.listdir(path) if f == 'movie_review_'+str(movie_id)+'.json' ][0]
+        file = path + [f for f in os.listdir(path) if f == 'movie_review_'+str(movie_id)+'.parquet' ][0]
     except:
         reviews = tmdb.Movies(movie_id).reviews()
-        fname = path + 'movie_review_'+str(movie_id)+'.json'
-        with open(fname, 'w') as f:
-                json.dump(reviews, f)
+        fname = path + 'movie_review_'+str(movie_id)+'.parquet'
+        #df = pd.read_json(reviews, lines=True)
+        df = pd.DataFrame([reviews])
+        df.to_parquet(fname, engine='fastparquet')
 
 def get_movies_id(path):
     '''gets the id of all movies'''
     try:
         file_movieid = path + [f for f in os.listdir(path) if f.startswith('raw_movies_')][0]
-        with open(file_movieid, "r") as f:
-            df = pd.read_json(f, lines=True)
-            movie_ids = df['id'].values
-            return movie_ids
+        df = pd.read_parquet(file_movieid)
+        movie_ids = df['id'].values
+        return movie_ids
     except:
         print('missing movie id file')
 
@@ -70,14 +74,14 @@ def get_movies_id(path):
 def main():
     path_movie_id = f'./movies/raw_data/collections/'
     raw_movies_id(path_movie_id)
-
     movies_ids = get_movies_id(path_movie_id)
+ 
     path_movie_info = './movies/raw_data/movies_info/'
     path_movie_review = './movies/raw_data/movies_review/'
     c = 1
-    for movie in movies_ids:
+    for movie in movies_ids[:9000]:
         c +=1 # just a counter to check progress
-        if c == 1000:
+        if (c % 1000) == 0:
             print('movies collected: ',c)
         movie_info(movie, path_movie_info)
         movie_review(movie, path_movie_review)
@@ -85,3 +89,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#movie info 1kb json
+#movie review 70kb json
