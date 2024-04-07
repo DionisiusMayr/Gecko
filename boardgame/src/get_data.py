@@ -125,18 +125,18 @@ def get_reviews_of_game(game_id: int, queued_games: List[str]) -> List[str]:
 
     root = ET.fromstring(r_text)
     grab_all_pages(game_id, root, queued_games)
-    # print("Queued Games:", len(queued_games), queued_games)
+    print("Queued Games:", len(queued_games), queued_games)
 
-    # users = []
-    # for c in root[0]:
-    #     if c.tag == 'comments':
-    #         total_ratings = c.attrib['totalitems']
-    #         for comment in c:
-    #             username = comment.attrib['username']
-    #             rating = comment.attrib['rating']
-    #             users.append(username)
+    users = []
+    for c in root[0]:
+        if c.tag == 'comments':
+            total_ratings = c.attrib['totalitems']
+            for comment in c:
+                username = comment.attrib['username']
+                rating = comment.attrib['rating']
+                users.append(username)
 
-    # return users
+    return users
 
 
 def users_who_rated_game(game_id: int) -> List[str]:
