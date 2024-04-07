@@ -38,17 +38,14 @@ def read_jsons_to_dataframe(file_names, folder_path):
 def generate_partitioned_parquets_for_folder_path(folder_name):
     folder_path = f'./data/{folder_name}'
     files = os.listdir(folder_path)
-    pagination_size = 500
-    elements = 0
-    cnt = 0
-    while elements < len(files):
-        cnt += 1
-        elements += pagination_size
+    files_df = pd.DataFrame({'file_name':files})
+    files_df['first_letter'] = files_df.file_name.apply(lambda x: x[0].lower() if x[0].isalpha() else '*')
+    for prefix, group in files_df.groupby('first_letter'):
         dataframe = read_jsons_to_dataframe(
-            files[pagination_size*(cnt-1):min(pagination_size*cnt, len(files))],
+            group.file_name.values,
             folder_path
         )
-        output_file = f'./parquets/{folder_name}_{cnt}.parquet'
+        output_file = f'./parquets/{folder_name}_{prefix}.parquet'
         write_dataframe_to_parquet(dataframe, output_file)
         print(f"Parquet file '{output_file}' has been generated successfully.")
 
@@ -67,12 +64,15 @@ def generate_parquet_for_folder_path(folder_path, output_file):
 def main ():
     change_directory_root()
     make_directory()
+    # Generate Partitioned data according to first letter
+    generate_partitioned_parquets_for_folder_path('user_anime_list')
+
+    # Saves in parquet normally
     folder_names = [
         'anime_info',
         'anime_reviews',
         'user_info',
     ]
-    generate_partitioned_parquets_for_folder_path('user_anime_list')
 
     for folder_name in folder_names:
         generate_parquet_for_folder_path(
