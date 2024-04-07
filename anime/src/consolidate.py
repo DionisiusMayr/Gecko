@@ -38,7 +38,7 @@ def read_jsons_to_dataframe(file_names, folder_path):
 def generate_partitioned_parquets_for_folder_path(folder_name):
     folder_path = f'./data/{folder_name}'
     files = os.listdir(folder_path)
-    pagination_size = 500
+    pagination_size = 1
     elements = 0
     cnt = 0
     while elements < len(files):
@@ -70,7 +70,7 @@ def main ():
     folder_names = [
         'anime_info',
         'anime_reviews',
-        'user_info',
+        'user_info'
     ]
     generate_partitioned_parquets_for_folder_path('user_anime_list')
 
