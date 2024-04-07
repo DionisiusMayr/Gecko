@@ -28,7 +28,7 @@ Once this is configured, one can start the containers using `docker compose up` 
 
 ## Interacting with HDFS
 
-This commands can be used as a reference to interact with HDFS in this setup.
+These commands can be used as a reference to interact with HDFS in this setup.
 
 To get a `bash` instance of the container:
 ```sh
