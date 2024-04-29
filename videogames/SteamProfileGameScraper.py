@@ -5,7 +5,7 @@ import os
 import time
 from json.decoder import JSONDecodeError
 
-API_KEY = '6B09F8A45ACB9DAA88DBB9056F499BC2' #my API key, change if someone else
+API_KEY = '6B09F8A45ACB9DAA88DBB9056F499BC2' #my API key, change if someone else, obtain one at https://steamcommunity.com/dev/apikey
 OUTPUT_JSON_FILE = 'steam_profiles.json'
 OUTPUT_PARQUET_FILE = 'steam_profiles.parquet'
 
