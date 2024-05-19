@@ -1,3 +1,6 @@
+"""
+Dependency installation: pip install tmdbsimple pyarrow fastparquet
+"""
 import tmdbsimple as tmdb
 from datetime import date, datetime, timedelta
 import requests
@@ -72,14 +75,14 @@ def get_movies_id(path):
 
 
 def main():
-    path_movie_id = f'./movies/raw_data/collections/'
+    path_movie_id = f'./raw_data/collections/'
     raw_movies_id(path_movie_id)
     movies_ids = get_movies_id(path_movie_id)
  
-    path_movie_info = './movies/raw_data/movies_info/'
-    path_movie_review = './movies/raw_data/movies_review/'
+    path_movie_info = './raw_data/movies_info/'
+    path_movie_review = './raw_data/movies_review/'
     c = 1
-    for movie in movies_ids[:9000]:
+    for movie in movies_ids[:90]:
         c +=1 # just a counter to check progress
         if (c % 1000) == 0:
             print('movies collected: ',c)
