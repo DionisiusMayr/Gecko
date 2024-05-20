@@ -7,7 +7,7 @@ from json.decoder import JSONDecodeError
 
 API_KEY = '6B09F8A45ACB9DAA88DBB9056F499BC2'
 OUTPUT_JSON_FILE = 'player_summaries.json'
-OUTPUT_PARQUET_FILE = 'player_summaries.parquet'
+# OUTPUT_PARQUET_FILE = 'player_summaries.parquet'
 MAX_RETRIES = 3
 
 def get_player_summary(steamid):
@@ -25,12 +25,12 @@ def get_player_summary(steamid):
     print(f"Failed to fetch data for SteamID: {steamid} after {MAX_RETRIES} retries.")
     return None
 
-def save_as_parquet(results):
-    # Convert JSON to DataFrame
-    df = pd.json_normalize(results)
+# def save_as_parquet(results):
+#     # Convert JSON to DataFrame
+#     df = pd.json_normalize(results)
 
-    # Save DataFrame as Parquet file
-    df.to_parquet(OUTPUT_PARQUET_FILE)
+#     # Save DataFrame as Parquet file
+#     df.to_parquet(OUTPUT_PARQUET_FILE)
 
 def main():
     start_steamid = 76561197960265730
@@ -63,17 +63,17 @@ def main():
                 json.dump(results, file, indent=4)
             print(f"Data saved up to SteamID: {steamid}")
 
-            # Save as Parquet file
-            save_as_parquet(results)
-            print(f"Parquet file saved up to SteamID: {steamid}")
+            # # Save as Parquet file
+            # save_as_parquet(results)
+            # print(f"Parquet file saved up to SteamID: {steamid}")
 
         time.sleep(1.5)  # Rate limit set to 1.5 seconds
 
     with open(OUTPUT_JSON_FILE, 'w') as file:
         json.dump(results, file, indent=4)
     
-    # Save as Parquet file for the entire dataset
-    save_as_parquet(results)
+    # # Save as Parquet file for the entire dataset
+    # save_as_parquet(results)
     
     print("Script completed successfully.")
 
