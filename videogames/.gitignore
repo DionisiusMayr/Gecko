@@ -3,3 +3,4 @@ player_summaries.parquet
 steam_profiles.json
 steam_profiles.parquet
 steam_users.parquet
+sample_steam_users.parquet

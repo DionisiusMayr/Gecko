@@ -1,18 +1,14 @@
-#Structure of combined Steam file
-# Username id, type of content, id of content, rating (0,10), date of rating
-
-# Table of content(platform dependant)
-# Table of username (platform dependant)
-
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, max as spark_max, lit, ceil
 import json
-import pandas as pd
 import math
-import numpy as np
 
 OUTPUT_PARQUET_FILE = 'steam_users.parquet'
 
-spark = SparkSession.builder.getOrCreate()
+spark = SparkSession.builder \
+    .appName("SteamUsers") \
+    .config("spark.rpc.message.maxSize", "2") \
+    .getOrCreate()
 
 # Load player_summaries.json
 with open('player_summaries.json', 'r') as f:
@@ -22,7 +18,7 @@ with open('player_summaries.json', 'r') as f:
 with open('steam_profiles.json', 'r') as f:
     steam_profiles_data = json.load(f)
 
-# Initialize lists to store data
+# Initialize list to store data
 common_rows = []
 
 # Process data from steam_profiles_data
@@ -39,38 +35,33 @@ for steam_profiles in steam_profiles_data:
             if playtime_forever > 0:  # Skip if playtime_forever is 0
                 common_rows.append({'user_id': personaname, 'type': 'Steam', 'content_id': appid, 'temp_rating': playtime_forever})
 
-# Create common dataframe
-common_df = pd.DataFrame(common_rows)
+# Create Spark DataFrame
+common_df = spark.createDataFrame(common_rows)
 
 # Calculate max playtime_forever for each user_id
-max_playtime = common_df.groupby('user_id')['temp_rating'].max()
+max_playtime = common_df.groupBy('user_id').agg(spark_max('temp_rating').alias('max_temp_rating'))
 
-# 'Normalize' ratings from 0 to 10
-common_df['rating'] = common_df.groupby('user_id')['temp_rating'].transform(lambda x: (x / x.max()) * 10)
-common_df['rating'] = common_df['rating'].apply(lambda x: math.ceil(x))
+# Join max_playtime with common_df to calculate normalized ratings
+common_df = common_df.join(max_playtime, on='user_id')
+common_df = common_df.withColumn('rating', (col('temp_rating') / col('max_temp_rating')) * 10)
 
-# Drop the 'temp_rating' column
-common_df.drop(columns=['temp_rating'], inplace=True)
+# Apply ceiling to the ratings
+common_df = common_df.withColumn('rating', ceil(col('rating')))
+
+# Drop the 'temp_rating' and 'max_temp_rating' columns
+common_df = common_df.drop('temp_rating', 'max_temp_rating')
 
 # Add a new column 'rating_date' filled with null values
-common_df['rating_date'] = np.nan
+common_df = common_df.withColumn('rating_date', lit(None).cast('string'))
 
-# Display the Pandas Dataframe
-print(common_df.head())
+# Display the Spark DataFrame
+common_df.show(10)
 
-# Take a sample of the data that is roughly under 10 kb. Uncomment if needed. Adjust as needed.
-# sample_df = common_df.sample(n=10)
-# print("Sample DataFrame shape:", sample_df.shape)
-# sample_df.to_parquet('sample_steam_users.parquet')
+# Take a sample of the data. Comment or uncomment 
+# sample_df = common_df.sample(withReplacement=False, fraction=0.001)
+# sample_df.write.parquet('sample_steam_users.parquet')
 
 # Save DataFrame as Parquet file
-common_df.to_parquet(OUTPUT_PARQUET_FILE)
-
-#Load Parquet file as Spark Dataframe
-videogames = spark.read.parquet(OUTPUT_PARQUET_FILE)
-
-#Display Spark Dataframe
-videogames.show(10)
-videogames.printSchema()
+common_df.write.parquet(OUTPUT_PARQUET_FILE)
 
 spark.stop()
