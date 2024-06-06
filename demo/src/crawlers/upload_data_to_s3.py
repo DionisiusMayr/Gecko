@@ -42,7 +42,7 @@ def upload_movies():
     movie_path = f'/home/dionisius/bdma/upc/big_data_management/project/Gecko/demo/local_raw_data/movies_info'
     movies = os.listdir(movie_path)
     for m in movies:
-        fkey = f"movie/movie/{m}"
+        fkey = f"movie/info/{m}"
         fpath = f"{movie_path}/{m}"
         S3.put_file_in_bucket(BUCKET, fkey, fpath)
 
@@ -67,8 +67,8 @@ if __name__ == '__main__':
     create_buckets()
     S3.delete_everything_from_bucket(BUCKET)
 
-    # upload_boardgames()
+    upload_boardgames()
     upload_movies()
-    # upload_videogames()
+    upload_videogames()
 
     S3.list_all_files_in_bucket(BUCKET)
