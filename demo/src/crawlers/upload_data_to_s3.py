@@ -12,14 +12,14 @@ def create_buckets():
 
 
 def upload_boardgames():
-    collection_path = '/home/dionisius/bdma/upc/big_data_management/project/Gecko/boardgame/raw_data/collection'
+    collection_path = '/home/dionisius/bdma/upc/big_data_management/project/Gecko/demo/local_raw_data/boardgame/collection'
     xmls = os.listdir(collection_path)
     for xml in xmls:
         fkey = f"boardgame/collection/{xml}"
         fpath = f"{collection_path}/{xml}"
         S3.put_file_in_bucket(BUCKET, fkey, fpath)
 
-    boardgame_path = '/home/dionisius/bdma/upc/big_data_management/project/Gecko/boardgame/raw_data/boardgame'
+    boardgame_path = '/home/dionisius/bdma/upc/big_data_management/project/Gecko/demo/local_raw_data/boardgame/boardgame'
     folders = os.listdir(boardgame_path)
     for folder in folders:
         for xml in os.listdir(f"{boardgame_path}/{folder}"):
