@@ -47,6 +47,21 @@ def upload_movies():
         S3.put_file_in_bucket(BUCKET, fkey, fpath)
 
 
+def upload_animes():
+    info_path =  f'/home/dionisius/bdma/upc/big_data_management/project/Gecko/demo/local_raw_data/anime/anime_info'
+    infos = os.listdir(info_path)
+    for info in infos:
+        fkey = f"anime/info/{info}"
+        fpath = f"{info_path}/{info}"
+        S3.put_file_in_bucket(BUCKET, fkey, fpath)
+
+    user_path =  f'/home/dionisius/bdma/upc/big_data_management/project/Gecko/demo/local_raw_data/anime/user_anime_list'
+    user_infos = os.listdir(user_path)
+    for user_info in user_infos:
+        fkey = f"anime/user_info/{user_info}"
+        fpath = f"{user_path}/{user_info}"
+        S3.put_file_in_bucket(BUCKET, fkey, fpath)
+
 def upload_videogames():
     # Profile information of the player
     profiles = f'/home/dionisius/bdma/upc/big_data_management/project/Gecko/demo/local_raw_data/videogames/player_summaries.json'
@@ -69,6 +84,7 @@ if __name__ == '__main__':
 
     upload_boardgames()
     upload_movies()
+    upload_animes()
     upload_videogames()
 
     S3.list_all_files_in_bucket(BUCKET)
