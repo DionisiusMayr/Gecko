@@ -12,7 +12,7 @@ import io
 
 API_KEY = 'f95b4a84e123d3cf04a4b4730e1bcf32'
 tmdb.API_KEY = API_KEY
-tmdb.REQUESTS_TIMEOUT = 5  
+tmdb.REQUESTS_TIMEOUT = 5
 
 def raw_movie_day(path):
     '''call request for the day'''
@@ -29,14 +29,14 @@ def raw_movie_day(path):
     df = pd.read_json(json_movies_id, lines=True)
     df.to_parquet(path+ 'raw_movies_'+ day_before_str +'.parquet', engine='fastparquet')
 
-        
+
 def raw_movies_id(path):
     '''stores all movies id available'''
     try:
         file = path + [f for f in os.listdir(path) if f.startswith('raw_movies_')][0]
         os.remove(file)
         raw_movie_day(path)
-    except:   
+    except:
         raw_movie_day(path)
 
 def movie_info(movie_id, path):
@@ -75,7 +75,7 @@ def main():
     path_movie_id = f'./movies/raw_data/collections/'
     raw_movies_id(path_movie_id)
     movies_ids = get_movies_id(path_movie_id)
- 
+
     path_movie_info = './movies/raw_data/movies_info/'
     path_movie_review = './movies/raw_data/movies_review/'
     c = 1
@@ -85,7 +85,7 @@ def main():
             print('movies collected: ',c)
         movie_info(movie, path_movie_info)
         movie_review(movie, path_movie_review)
-    
+
 
 if __name__ == "__main__":
     main()
