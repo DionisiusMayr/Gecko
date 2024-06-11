@@ -44,3 +44,10 @@ hadoop fs -rm /1733.xml
 ```
 
 Here, `1733.xml` is an example of a file that is being put and removed from HDFS.
+
+# File Structure
+- anime: has the scraper for anime
+- movie: has the scraper for movie
+- boardgame: has the scraper for boardgame
+- videogame: has the scraper for videogame
+- demo: has all the information related to demo
