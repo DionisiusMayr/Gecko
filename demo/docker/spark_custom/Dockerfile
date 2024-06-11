@@ -17,4 +17,5 @@ RUN echo -e '\nspark.hadoop.fs.s3a.secret.key=test_access_key' >> /usr/local/spa
 RUN $SPARK_HOME/bin/pyspark --packages org.neo4j:neo4j-connector-apache-spark_2.12:5.3.0_for_spark_3
 
 USER jovyan
+RUN pip install --no-cache-dir graphdatascience
 CMD ["jupyter", "lab", "--NotebookApp.token=''"]
