@@ -3,7 +3,6 @@
 # A simple `docker build --network host -t spark_custom:0.1 ./docker/spark_custom` should suffice.
 services:
   spark:
-    # image: jupyter/pyspark-notebook
     image: spark_custom:0.1
     container_name: spark_container
     ports:
@@ -28,8 +27,6 @@ services:
     ports:
       - "127.0.0.1:4566:4566"
     volumes:
-      # We might need to change this S3 path here to something else
-      # - ./v_s3:/tmp/localstack_random
       - ./v_s3:/var/lib/localstack
     networks:
       - shared_network
@@ -42,7 +39,7 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4J_PLUGINS=\[\"graph-data-science\"\]
+      - NEO4J_PLUGINS=["graph-data-science"]
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -53,27 +50,6 @@ services:
     networks:
       - shared_network
 
-
-# volumes:
-#   v_s3:
-#     name: v_s3
-  # v_spark:
-    # name: v_spark
-
-
 networks:
   shared_network:
     driver: bridge
-# docker stop SPARK ; docker rm SPARK ; docker run --name SPARK -p 8888:8888 -v ~/bdma/upc/big_data_management/project/Gecko/p2:/home/jovyan jupyter/pyspark-notebook
-
-#     -p 7474:7474 \
-#     -p 7687:7687 \
-#     --env=NEO4J_AUTH=none \
-#     -v ${BASE_DIR}/SDM_Lab1/neo4j/import:/var/lib/neo4j/import \
-#     -v ${BASE_DIR}/SDM_Lab1/neo4j/logs:/var/lib/neo4j/logs \
-#     -v ${BASE_DIR}/SDM_Lab1/neo4j/conf:/var/lib/neo4j/conf \
-#     -e NEO4J_apoc_export_file_enabled=true \
-#     -e NEO4J_apoc_import_file_enabled=true \
-#     -e NEO4J_apoc_import_file_use__neo4j__config=true \
-#     -e NEO4J_PLUGINS=\[\"graph-data-science\"\] \
-#     neo4j:5.17.0-community-bullseye
