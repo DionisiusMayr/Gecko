@@ -1,0 +1,55 @@
+# A custom image for spark is being used to install any dependencies on it a single time.
+# This means that `spark_custom:0.1` has to be built before using it.
+# A simple `docker build --network host -t spark_custom:0.1 ./docker/spark_custom` should suffice.
+services:
+  spark:
+    image: spark_custom:0.1
+    container_name: spark_container
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./v_spark:/home/jovyan
+    networks:
+      - shared_network
+    environment:
+      - GRANT_SUDO=yes
+      - AWS_ACCESS_KEY_ID=test_key_id
+      - AWS_SECRET_ACCESS_KEY=test_access_key
+
+  s3:
+    image: localstack/localstack:s3-latest
+    container_name: s3_container
+    environment:
+      - AWS_ACCESS_KEY_ID=test_key_id
+      - AWS_SECRET_ACCESS_KEY=test_access_key
+    expose:
+      - "4566"
+    ports:
+      - "127.0.0.1:4566:4566"
+    volumes:
+      - ./v_s3:/var/lib/localstack
+    networks:
+      - shared_network
+
+  neo4j:
+    image: neo4j:5.17.0-community-bullseye
+    container_name: neo4j_container
+    environment:
+      - NEO4J_AUTH=none
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_PLUGINS=["graph-data-science"]
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - ./v_neo4j/import:/var/lib/neo4j/import
+      - ./v_neo4j/logs:/var/lib/neo4j/logs
+      - ./v_neo4j/conf:/var/lib/neo4j/conf
+    networks:
+      - shared_network
+
+networks:
+  shared_network:
+    driver: bridge

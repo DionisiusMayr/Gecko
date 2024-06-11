@@ -160,3 +160,11 @@ cython_debug/
 #.idea/
 
 raw_data/
+/p2/movie/parsed_data.parquet/
+.ivy2
+.jupyter
+.local
+.python_history
+.bash_history
+img/
+local_raw_data/
